@@ -2,14 +2,25 @@ version: '3.8'
 
 services:
   api:
-    build: . 
+    build:
+      context: .
+      target: build
     container_name: backend-api
     ports:
-      - "8080:8080" 
+      - "8080:8080"
     environment:
       - ConnectionStrings__DefaultConnection=Server=db;Database=postgresdb;User Id=postgres;Password=postgrespass
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://*:8080
     depends_on:
-      - db 
+      - db
+    volumes:
+      - .:/src
+      - /src/obj
+      - /src/bin
+    command: >
+      bash -c "dotnet dev-certs https --trust;
+               dotnet watch run --project /src/MovieReservationSystem.csproj --urls http://*:8080"
 
   db:
     image: postgres:latest 

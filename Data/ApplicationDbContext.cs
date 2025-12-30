@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+
 namespace MovieReservationSystem.Data
 {
     public class ApplicationDbContext : DbContext

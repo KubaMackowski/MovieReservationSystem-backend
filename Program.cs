@@ -8,14 +8,15 @@ using MovieReservationSystem.Data;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 
 builder.Services.AddControllers();
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(connectionString) // Po prostu wywołaj UseNpgsql
+    options.UseNpgsql(connectionString)
 );
+
+// Jeśli nie masz jeszcze klasy JwtService, usuń poniższą linię, żeby nie było błędu
 builder.Services.AddScoped<JwtService>();
 
 builder.Services
@@ -24,24 +25,25 @@ builder.Services
     {
         options.TokenValidationParameters = new TokenValidationParameters()
         {
-            ValidateIssuer = false,
-            ValidateAudience = false,
+            ValidateIssuer = false,   // Dla uproszczenia na start false
+            ValidateAudience = false, // Dla uproszczenia na start false
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
+            // Upewnij się, że masz te wpisy w appsettings.json!
             ValidAudience = builder.Configuration["Jwt:Audience"],
             ValidIssuer = builder.Configuration["Jwt:Issuer"],
             IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)
             )
         };
     });
-     builder.Services.AddEndpointsApiExplorer();
+
+builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-
-  
 
 if (app.Environment.IsDevelopment())
 {
@@ -50,6 +52,11 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// --- WAŻNE: Dodano te dwie linie w tej kolejności ---
+app.UseAuthentication(); // 1. Najpierw sprawdź kim jest
+app.UseAuthorization();  // 2. Potem sprawdź czy ma dostęp
+// ---------------------------------------------------
 
 var summaries = new[]
 {

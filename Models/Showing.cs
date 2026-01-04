@@ -1,5 +1,11 @@
+using System.Collections.Generic; // To może być potrzebne do List<>
+
+namespace MovieReservationSystem.Models
+{
 public class Showing
 {
+
+
     public int Id { get; set; }
     public int Movie_Id { get; set; }
     public DateTime Date { get; set; }
@@ -8,6 +14,7 @@ public class Showing
 
     public required Movie Movie { get; set; }
     public required Room Room { get; set; }
-    public ICollection<Reservation>? Reservations { get; set; }
+    public ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();
     public ICollection<Price>? Prices { get; set; }
+}
 }

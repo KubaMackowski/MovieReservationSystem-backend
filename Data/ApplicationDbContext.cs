@@ -1,13 +1,22 @@
+
+using Microsoft.AspNetCore.Identity; // <--- 1. DODANE
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore; // <--- 2. DODANE
 using Microsoft.EntityFrameworkCore;
 namespace MovieReservationSystem.Data
 {
-    public class ApplicationDbContext : DbContext
+    // 3. ZMIANA: Dziedziczenie po IdentityDbContext<IdentityUser>
+    public class ApplicationDbContext : IdentityDbContext<IdentityUser>
     {
-            public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
         }
-        public DbSet<User> Users { get; set; }
+
+        // UWAGA: IdentityDbContext sam zarządza użytkownikami w tabeli "AspNetUsers".
+        // Jeśli Twoja klasa 'User' to stara tabela użytkowników, powinieneś ją usunąć 
+        // lub zintegrować z IdentityUser. Na razie zostawiam, ale może powodować konflikt nazw.
+        // public DbSet<User> Users { get; set; } 
+
         public DbSet<Movie> Movies { get; set; }
         public DbSet<Genre> Genres { get; set; }
         public DbSet<MovieGenre> MovieGenres { get; set; }
@@ -15,7 +24,7 @@ namespace MovieReservationSystem.Data
         public DbSet<Seat> Seats { get; set; }
         public DbSet<Showing> Showings { get; set; }
         public DbSet<Reservation> Reservations { get; set; }
-        public DbSet<File> Files { get; set; }
+        public DbSet<MovieReservationSystem.Models.File> Files { get; set; }
         public DbSet<Photo> Photos { get; set; }
         public DbSet<Trailer> Trailers { get; set; }
         public DbSet<MovieTrailer> MovieTrailers { get; set; }
@@ -23,6 +32,10 @@ namespace MovieReservationSystem.Data
 
         protected override void OnModelCreating(ModelBuilder model)
         {
+            // 4. KLUCZOWE: Musisz wywołać konfigurację bazową Identity!
+            // Bez tego Entity Framework nie wie, jak stworzyć tabele użytkowników.
+            base.OnModelCreating(model); 
+
             // MovieGenres composite key
             model.Entity<MovieGenre>()
                 .HasKey(mg => new { mg.Genre_Id, mg.Movie_Id });
@@ -34,7 +47,7 @@ namespace MovieReservationSystem.Data
 
             // Relationships
             model.Entity<Reservation>()
-                .HasOne(r => r.User)
+                .HasOne(r => r.User) // <--- Tu może być konflikt, jeśli Reservation łączy się ze starą klasą User
                 .WithMany(u => u.Reservations)
                 .HasForeignKey(r => r.User_Id);
 

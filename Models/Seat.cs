@@ -1,3 +1,5 @@
+namespace MovieReservationSystem.Models
+{
 public class Seat
 {
     public int Id { get; set; }
@@ -6,5 +8,6 @@ public class Seat
     public int Room_Id { get; set; }
 
     public required Room Room { get; set; }
-    public ICollection<Reservation>? Reservations { get; set; }
+    public ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();
+}
 }

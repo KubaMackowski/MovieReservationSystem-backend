@@ -4,6 +4,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using MovieReservationSystem.Services;
 using MovieReservationSystem.Data;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,10 +21,23 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // Jeśli nie masz jeszcze klasy JwtService, usuń poniższą linię, żeby nie było błędu
 builder.Services.AddScoped<JwtService>();
 
+builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders(); // <--- TU MA BYĆ ŚREDNIK! Koniec konfiguracji Identity.
+
+// BLOK 2: Konfiguracja JWT (zaczynamy od nowa na builder.Services)
+builder.Services.AddAuthentication(options => 
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+});
+
+
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
+
         options.TokenValidationParameters = new TokenValidationParameters()
         {
             ValidateIssuer = false,   // Dla uproszczenia na start false

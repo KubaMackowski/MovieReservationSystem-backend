@@ -1,8 +1,11 @@
-public class Price
+namespace MovieReservationSystem.Models // <--- DODAJ
 {
+    public class Price
+    {
     public int Id { get; set; }
     public int Showing_Id { get; set; }
     public decimal PriceValue { get; set; }
 
     public required Showing Showing { get; set; }
+}
 }

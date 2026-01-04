@@ -1,3 +1,8 @@
+using System.Collections.Generic;
+
+namespace MovieReservationSystem.Models // <--- Pamiętaj o namespace!
+{
+
 public class File
 {
     public int Id { get; set; }
@@ -7,4 +12,5 @@ public class File
     public required string Hash { get; set; }
 
     public ICollection<Photo>? Photos { get; set; }
+}
 }

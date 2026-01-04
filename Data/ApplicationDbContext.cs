@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Identity; // <--- 1. DODANE
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore; // <--- 2. DODANE
 using Microsoft.EntityFrameworkCore;
+using MovieReservationSystem.Models;
+
 namespace MovieReservationSystem.Data
 {
     // 3. ZMIANA: Dziedziczenie po IdentityDbContext<IdentityUser>

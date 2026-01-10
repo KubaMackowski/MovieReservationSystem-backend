@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MovieReservationSystem.DTOs;
+using MovieReservationSystem.Models;
 
 namespace MovieReservationSystem.Controllers
 {
@@ -11,10 +12,10 @@ namespace MovieReservationSystem.Controllers
     [Authorize(Roles = "ADMIN")] // Dostęp tylko dla roli Administrator
     public class UsersController : ControllerBase
     {
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
 
         // Wstrzykujemy UserManager
-        public UsersController(UserManager<IdentityUser> userManager)
+        public UsersController(UserManager<ApplicationUser> userManager)
         {
             _userManager = userManager;
         }
@@ -66,7 +67,7 @@ namespace MovieReservationSystem.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            var user = new IdentityUser
+            var user = new ApplicationUser
             {
                 Email = model.Email,
                 UserName = model.Email,

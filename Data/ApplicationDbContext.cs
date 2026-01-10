@@ -7,7 +7,7 @@ using MovieReservationSystem.Models;
 namespace MovieReservationSystem.Data
 {
     // 3. ZMIANA: Dziedziczenie po IdentityDbContext<IdentityUser>
-    public class ApplicationDbContext : IdentityDbContext<IdentityUser>
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
@@ -49,9 +49,9 @@ namespace MovieReservationSystem.Data
 
             // Relationships
             model.Entity<Reservation>()
-                .HasOne(r => r.User) // <--- Tu może być konflikt, jeśli Reservation łączy się ze starą klasą User
-                .WithMany(u => u.Reservations)
-                .HasForeignKey(r => r.User_Id);
+                .HasOne(r => r.User)         // Rezerwacja ma jednego Usera (typu ApplicationUser)
+                .WithMany(u => u.Reservations) // Teraz to zadziała! Użytkownik ma wiele rezerwacji
+                .HasForeignKey(r => r.UserId); // Upewnij się, że w modelu Reservation pole nazywa się UserId
 
             model.Entity<Reservation>()
                 .HasOne(r => r.Seat)

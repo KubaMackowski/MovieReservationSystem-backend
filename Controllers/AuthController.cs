@@ -5,6 +5,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using MovieReservationSystem.DTOs;
+using MovieReservationSystem.Models;
 
 namespace MovieReservationSystem.Controllers
 {
@@ -12,11 +13,11 @@ namespace MovieReservationSystem.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly IConfiguration _configuration; // Potrzebne do pobrania klucza z appsettings
 
         public AuthController(
-            UserManager<IdentityUser> userManager,
+            UserManager<ApplicationUser> userManager,
             IConfiguration configuration)
         {
             _userManager = userManager;
@@ -29,7 +30,7 @@ namespace MovieReservationSystem.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var user = new IdentityUser
+            var user = new ApplicationUser
             {
                 UserName = request.Email,
                 Email = request.Email

@@ -6,6 +6,7 @@ using MovieReservationSystem.Services;
 using MovieReservationSystem.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using MovieReservationSystem.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,7 +22,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // Jeśli nie masz jeszcze klasy JwtService, usuń poniższą linię, żeby nie było błędu
 builder.Services.AddScoped<JwtService>();
 
-builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders(); // <--- TU MA BYĆ ŚREDNIK! Koniec konfiguracji Identity.
 

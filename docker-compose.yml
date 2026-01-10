@@ -22,6 +22,8 @@ services:
     command: >
       bash -c "dotnet dev-certs https --trust;
                dotnet watch run --project /src/MovieReservationSystem.csproj --urls http://*:8080"
+    networks:
+      - app-network
 
   db:
     image: postgres:latest
@@ -34,6 +36,8 @@ services:
       - postgres-data:/var/lib/postgresql
     ports:
       - "5438:5432"
+    networks:
+      - app-network 
 
   pgadmin:
     image: dpage/pgadmin4:latest
@@ -49,7 +53,14 @@ services:
       - pgadmin-data:/var/lib/pgadmin
     depends_on:
       - db
+    networks:
+      - app-network 
 
 volumes:
   postgres-data:
-  pgadmin-data: 
+  pgadmin-data:
+
+networks:
+  app-network:
+    name: movie-system-network
+    driver: bridge

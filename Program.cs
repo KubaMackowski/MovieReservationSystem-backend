@@ -57,15 +57,25 @@ builder.Services
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowNextJs",
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:3000") // Adres frontendu
+                .AllowAnyHeader()
+                .AllowAnyMethod()
+                .AllowCredentials(); 
+        });
+});
+
 var app = builder.Build();
 
-// Uruchomienie Seedera
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     try 
     {
-        // Czekamy na wykonanie
         await DataSeeder.SeedRolesAndAdminAsync(services);
     }
     catch (Exception ex)
@@ -75,7 +85,6 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-// Configure the HTTP request pipeline.
 
 if (app.Environment.IsDevelopment())
 {
@@ -85,10 +94,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// --- WAŻNE: Dodano te dwie linie w tej kolejności ---
-app.UseAuthentication(); // 1. Najpierw sprawdź kim jest
-app.UseAuthorization();  // 2. Potem sprawdź czy ma dostęp
-// ---------------------------------------------------
+app.UseAuthentication();
+app.UseAuthorization(); 
+
+app.UseCors("AllowNextJs");
 
 app.MapControllers();
 

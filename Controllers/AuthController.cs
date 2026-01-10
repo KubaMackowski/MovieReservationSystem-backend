@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
 using MovieReservationSystem.DTOs;
 using MovieReservationSystem.Models;
 
@@ -94,6 +95,31 @@ namespace MovieReservationSystem.Controllers
             }
 
             return Unauthorized("Błędny login lub hasło.");
+        }
+        
+        [HttpGet("me")]
+        [Authorize]
+        public async Task<ActionResult<UserDto>> GetMe()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized();
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null) return NotFound("Użytkownik nie istnieje.");
+
+            var roles = await _userManager.GetRolesAsync(user);
+
+            return Ok(new UserDto
+            {
+                Id = user.Id,
+                Email = user.Email,
+                UserName = user.UserName,
+                Roles = roles
+            });
         }
     }
 }

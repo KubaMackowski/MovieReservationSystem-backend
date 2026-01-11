@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MovieReservationSystem.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260110183723_InitialIdentitySetup")]
+    [Migration("20260111205902_InitialIdentitySetup")]
     partial class InitialIdentitySetup
     {
         /// <inheritdoc />
@@ -293,6 +293,9 @@ namespace MovieReservationSystem.Migrations
                     b.Property<int>("Duration")
                         .HasColumnType("integer");
 
+                    b.Property<int?>("PosterId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Production")
                         .IsRequired()
                         .HasColumnType("text");
@@ -309,6 +312,8 @@ namespace MovieReservationSystem.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("PosterId");
 
                     b.ToTable("Movies");
                 });
@@ -334,55 +339,6 @@ namespace MovieReservationSystem.Migrations
                     b.HasIndex("MovieId");
 
                     b.ToTable("MovieGenres");
-                });
-
-            modelBuilder.Entity("MovieReservationSystem.Models.MovieTrailer", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("Movie_Id")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Trailer_Id")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Movie_Id");
-
-                    b.HasIndex("Trailer_Id");
-
-                    b.ToTable("MovieTrailers");
-                });
-
-            modelBuilder.Entity("MovieReservationSystem.Models.Photo", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("File_Id")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Movie_Id")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("Order")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("File_Id");
-
-                    b.HasIndex("Movie_Id");
-
-                    b.ToTable("Photos");
                 });
 
             modelBuilder.Entity("MovieReservationSystem.Models.Price", b =>
@@ -514,27 +470,6 @@ namespace MovieReservationSystem.Migrations
                     b.ToTable("Showings");
                 });
 
-            modelBuilder.Entity("MovieReservationSystem.Models.Trailer", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Source")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Thumbnail")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Trailers");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -586,6 +521,15 @@ namespace MovieReservationSystem.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("MovieReservationSystem.Models.Movie", b =>
+                {
+                    b.HasOne("MovieReservationSystem.Models.File", "Poster")
+                        .WithMany()
+                        .HasForeignKey("PosterId");
+
+                    b.Navigation("Poster");
+                });
+
             modelBuilder.Entity("MovieReservationSystem.Models.MovieGenre", b =>
                 {
                     b.HasOne("MovieReservationSystem.Models.Genre", "Genre")
@@ -601,44 +545,6 @@ namespace MovieReservationSystem.Migrations
                         .IsRequired();
 
                     b.Navigation("Genre");
-
-                    b.Navigation("Movie");
-                });
-
-            modelBuilder.Entity("MovieReservationSystem.Models.MovieTrailer", b =>
-                {
-                    b.HasOne("MovieReservationSystem.Models.Movie", "Movie")
-                        .WithMany("MovieTrailers")
-                        .HasForeignKey("Movie_Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("MovieReservationSystem.Models.Trailer", "Trailer")
-                        .WithMany("MovieTrailers")
-                        .HasForeignKey("Trailer_Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Movie");
-
-                    b.Navigation("Trailer");
-                });
-
-            modelBuilder.Entity("MovieReservationSystem.Models.Photo", b =>
-                {
-                    b.HasOne("MovieReservationSystem.Models.File", "File")
-                        .WithMany("Photos")
-                        .HasForeignKey("File_Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("MovieReservationSystem.Models.Movie", "Movie")
-                        .WithMany("Photos")
-                        .HasForeignKey("Movie_Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("File");
 
                     b.Navigation("Movie");
                 });
@@ -716,11 +622,6 @@ namespace MovieReservationSystem.Migrations
                     b.Navigation("Reservations");
                 });
 
-            modelBuilder.Entity("MovieReservationSystem.Models.File", b =>
-                {
-                    b.Navigation("Photos");
-                });
-
             modelBuilder.Entity("MovieReservationSystem.Models.Genre", b =>
                 {
                     b.Navigation("MovieGenres");
@@ -729,10 +630,6 @@ namespace MovieReservationSystem.Migrations
             modelBuilder.Entity("MovieReservationSystem.Models.Movie", b =>
                 {
                     b.Navigation("MovieGenres");
-
-                    b.Navigation("MovieTrailers");
-
-                    b.Navigation("Photos");
 
                     b.Navigation("Showings");
                 });
@@ -754,11 +651,6 @@ namespace MovieReservationSystem.Migrations
                     b.Navigation("Prices");
 
                     b.Navigation("Reservations");
-                });
-
-            modelBuilder.Entity("MovieReservationSystem.Models.Trailer", b =>
-                {
-                    b.Navigation("MovieTrailers");
                 });
 #pragma warning restore 612, 618
         }

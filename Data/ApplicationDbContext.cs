@@ -27,9 +27,6 @@ namespace MovieReservationSystem.Data
         public DbSet<Showing> Showings { get; set; }
         public DbSet<Reservation> Reservations { get; set; }
         public DbSet<MovieReservationSystem.Models.File> Files { get; set; }
-        public DbSet<Photo> Photos { get; set; }
-        public DbSet<Trailer> Trailers { get; set; }
-        public DbSet<MovieTrailer> MovieTrailers { get; set; }
         public DbSet<Price> Prices { get; set; }
 
         protected override void OnModelCreating(ModelBuilder model)
@@ -77,26 +74,6 @@ namespace MovieReservationSystem.Data
                 .HasOne(s => s.Movie)
                 .WithMany(m => m.Showings)
                 .HasForeignKey(s => s.Movie_Id);
-
-            model.Entity<MovieTrailer>()
-                .HasOne(mt => mt.Movie)
-                .WithMany(m => m.MovieTrailers)
-                .HasForeignKey(mt => mt.Movie_Id);
-
-            model.Entity<MovieTrailer>()
-                .HasOne(mt => mt.Trailer)
-                .WithMany(t => t.MovieTrailers)
-                .HasForeignKey(mt => mt.Trailer_Id);
-
-            model.Entity<Photo>()
-                .HasOne(p => p.Movie)
-                .WithMany(m => m.Photos)
-                .HasForeignKey(p => p.Movie_Id);
-
-            model.Entity<Photo>()
-                .HasOne(p => p.File)
-                .WithMany(f => f.Photos)
-                .HasForeignKey(p => p.File_Id);
 
             model.Entity<Price>()
                 .HasOne(p => p.Showing)

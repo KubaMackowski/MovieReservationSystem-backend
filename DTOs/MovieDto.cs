@@ -14,6 +14,7 @@ namespace MovieReservationSystem.DTOs
         public string Director { get; set; }
         public string Production { get; set; }
         public string Cast { get; set; }
+        public string Poster { get; set; }
         
         // Zwracamy listę nazw gatunków, zamiast skomplikowanych obiektów
         public List<string> Genres { get; set; } = new List<string>();

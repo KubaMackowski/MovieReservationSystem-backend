@@ -81,27 +81,6 @@ namespace MovieReservationSystem.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Movies",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Title = table.Column<string>(type: "text", nullable: false),
-                    Description = table.Column<string>(type: "text", nullable: false),
-                    Status = table.Column<string>(type: "text", nullable: false),
-                    Created_At = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    Relase_Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    Duration = table.Column<int>(type: "integer", nullable: false),
-                    Cast = table.Column<string>(type: "text", nullable: false),
-                    Director = table.Column<string>(type: "text", nullable: false),
-                    Production = table.Column<string>(type: "text", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Movies", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Rooms",
                 columns: table => new
                 {
@@ -113,20 +92,6 @@ namespace MovieReservationSystem.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Rooms", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Trailers",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Source = table.Column<string>(type: "text", nullable: false),
-                    Thumbnail = table.Column<string>(type: "text", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Trailers", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -236,6 +201,54 @@ namespace MovieReservationSystem.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Movies",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Title = table.Column<string>(type: "text", nullable: false),
+                    Description = table.Column<string>(type: "text", nullable: false),
+                    Status = table.Column<string>(type: "text", nullable: false),
+                    Created_At = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Relase_Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Duration = table.Column<int>(type: "integer", nullable: false),
+                    Cast = table.Column<string>(type: "text", nullable: false),
+                    Director = table.Column<string>(type: "text", nullable: false),
+                    Production = table.Column<string>(type: "text", nullable: false),
+                    PosterId = table.Column<int>(type: "integer", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Movies", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Movies_Files_PosterId",
+                        column: x => x.PosterId,
+                        principalTable: "Files",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Seats",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Row = table.Column<int>(type: "integer", nullable: false),
+                    Number = table.Column<int>(type: "integer", nullable: false),
+                    Room_Id = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Seats", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Seats_Rooms_Room_Id",
+                        column: x => x.Room_Id,
+                        principalTable: "Rooms",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "MovieGenres",
                 columns: table => new
                 {
@@ -257,54 +270,6 @@ namespace MovieReservationSystem.Migrations
                         name: "FK_MovieGenres_Movies_MovieId",
                         column: x => x.MovieId,
                         principalTable: "Movies",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Photos",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Movie_Id = table.Column<int>(type: "integer", nullable: false),
-                    File_Id = table.Column<int>(type: "integer", nullable: false),
-                    Order = table.Column<int>(type: "integer", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Photos", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Photos_Files_File_Id",
-                        column: x => x.File_Id,
-                        principalTable: "Files",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Photos_Movies_Movie_Id",
-                        column: x => x.Movie_Id,
-                        principalTable: "Movies",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Seats",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Row = table.Column<int>(type: "integer", nullable: false),
-                    Number = table.Column<int>(type: "integer", nullable: false),
-                    Room_Id = table.Column<int>(type: "integer", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Seats", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Seats_Rooms_Room_Id",
-                        column: x => x.Room_Id,
-                        principalTable: "Rooms",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -333,32 +298,6 @@ namespace MovieReservationSystem.Migrations
                         name: "FK_Showings_Rooms_Room_Id",
                         column: x => x.Room_Id,
                         principalTable: "Rooms",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "MovieTrailers",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Trailer_Id = table.Column<int>(type: "integer", nullable: false),
-                    Movie_Id = table.Column<int>(type: "integer", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_MovieTrailers", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_MovieTrailers_Movies_Movie_Id",
-                        column: x => x.Movie_Id,
-                        principalTable: "Movies",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_MovieTrailers_Trailers_Trailer_Id",
-                        column: x => x.Trailer_Id,
-                        principalTable: "Trailers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -466,24 +405,9 @@ namespace MovieReservationSystem.Migrations
                 column: "MovieId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_MovieTrailers_Movie_Id",
-                table: "MovieTrailers",
-                column: "Movie_Id");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_MovieTrailers_Trailer_Id",
-                table: "MovieTrailers",
-                column: "Trailer_Id");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Photos_File_Id",
-                table: "Photos",
-                column: "File_Id");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Photos_Movie_Id",
-                table: "Photos",
-                column: "Movie_Id");
+                name: "IX_Movies_PosterId",
+                table: "Movies",
+                column: "PosterId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Prices_Showing_Id",
@@ -544,12 +468,6 @@ namespace MovieReservationSystem.Migrations
                 name: "MovieGenres");
 
             migrationBuilder.DropTable(
-                name: "MovieTrailers");
-
-            migrationBuilder.DropTable(
-                name: "Photos");
-
-            migrationBuilder.DropTable(
                 name: "Prices");
 
             migrationBuilder.DropTable(
@@ -560,12 +478,6 @@ namespace MovieReservationSystem.Migrations
 
             migrationBuilder.DropTable(
                 name: "Genres");
-
-            migrationBuilder.DropTable(
-                name: "Trailers");
-
-            migrationBuilder.DropTable(
-                name: "Files");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
@@ -581,6 +493,9 @@ namespace MovieReservationSystem.Migrations
 
             migrationBuilder.DropTable(
                 name: "Rooms");
+
+            migrationBuilder.DropTable(
+                name: "Files");
         }
     }
 }

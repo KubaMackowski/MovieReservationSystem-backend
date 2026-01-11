@@ -98,8 +98,6 @@ namespace MovieReservationSystem.Controllers
                 
                 // Inicjalizujemy puste kolekcje, bo są "required" w Twoim modelu
                 MovieGenres = new List<MovieGenre>(),
-                Photos = new List<Photo>(),     
-                MovieTrailers = new List<MovieTrailer>(),
                 Showings = new List<Showing>()
             };
 

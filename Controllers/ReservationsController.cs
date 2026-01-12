@@ -78,6 +78,7 @@ namespace MovieReservationSystem.Controllers
 
         // 3. POST: api/reservations
         [HttpPost]
+        [AllowAnonymous]
         public async Task<ActionResult<ReservationDto>> Create([FromBody] CreateReservationDto model)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);

@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using MovieReservationSystem.Models;
 
 namespace MovieReservationSystem.DTOs
 {
@@ -18,6 +19,31 @@ namespace MovieReservationSystem.DTOs
         
         // Zwracamy listę nazw gatunków, zamiast skomplikowanych obiektów
         public List<string> Genres { get; set; } = new List<string>();
+        public List<MShowingDto> Showings { get; set; } = new List<MShowingDto>();
+    }
+    
+    public class MShowingDto
+    {
+        public int Id { get; set; }
+        public DateTime Date { get; set; }
+        public DateTime End_Date { get; set; }
+        public decimal Price { get; set; }
+        public MRoomDto Room { get; set; } = null!;
+    }
+
+    public class MRoomDto
+    {
+        public int Id { get; set; }
+        public int Number { get; set; }
+        public List<MSeatDto> Seats { get; set; } = new();
+    }
+
+    public class MSeatDto
+    {
+        public int Id { get; set; }
+        public int Row { get; set; }
+        public int Number { get; set; }
+        public bool IsOccupied { get; set; } // To obliczymy w kontrolerze!
     }
 
     // 2. DTO do tworzenia (CREATE)

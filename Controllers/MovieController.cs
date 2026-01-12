@@ -52,30 +52,56 @@ namespace MovieReservationSystem.Controllers
         [HttpGet("{id}")]
         [AllowAnonymous]
         public async Task<ActionResult<MovieDto>> GetById(int id)
+{
+    var movie = await _context.Movies
+        .Include(m => m.MovieGenres).ThenInclude(mg => mg.Genre)
+        .Include(m => m.Showings).ThenInclude(s => s.Room).ThenInclude(r => r.SeatsList)
+        .Include(m => m.Showings).ThenInclude(s => s.Reservations) // Potrzebne do sprawdzenia zajętości
+        .Include(m => m.Showings).ThenInclude(s => s.Prices)
+        .FirstOrDefaultAsync(m => m.Id == id);
+
+    if (movie == null) return NotFound("Film nie został znaleziony.");
+
+    var movieDto = new MovieDto
+    {
+        Id = movie.Id,
+        Title = movie.Title,
+        Description = movie.Description,
+        Status = movie.Status,
+        Relase_Date = movie.Relase_Date,
+        Duration = movie.Duration,
+        Director = movie.Director,
+        Production = movie.Production,
+        Cast = movie.Cast,
+        Genres = movie.MovieGenres.Select(mg => mg.Genre.Name).ToList(),
+        
+        // --- MAPOWANIE RĘCZNE (PRZERYWA PĘTLĘ) ---
+        Showings = movie.Showings?.Select(s => new MShowingDto
         {
-            var movie = await _context.Movies
-                .Include(m => m.MovieGenres)
-                    .ThenInclude(mg => mg.Genre)
-                .FirstOrDefaultAsync(m => m.Id == id);
-
-            if (movie == null) return NotFound("Film nie został znaleziony.");
-
-            var movieDto = new MovieDto
+            Id = s.Id,
+            Date = s.Date,
+            End_Date = s.End_Date,
+            Price = s.Prices?.FirstOrDefault()?.PriceValue ?? 0, // Pobieramy cenę
+            
+            Room = new MRoomDto
             {
-                Id = movie.Id,
-                Title = movie.Title,
-                Description = movie.Description,
-                Status = movie.Status,
-                Relase_Date = movie.Relase_Date,
-                Duration = movie.Duration,
-                Director = movie.Director,
-                Production = movie.Production,
-                Cast = movie.Cast,
-                Genres = movie.MovieGenres.Select(mg => mg.Genre.Name).ToList()
-            };
+                Id = s.Room.Id,
+                Number = s.Room.Number,
+                // Mapujemy miejsca i sprawdzamy czy są zajęte w TYM seansie
+                Seats = s.Room.SeatsList.Select(seat => new MSeatDto
+                {
+                    Id = seat.Id,
+                    Row = seat.Row,
+                    Number = seat.Number,
+                    // Sprawdzamy czy ID miejsca znajduje się na liście rezerwacji tego seansu
+                    IsOccupied = s.Reservations.Any(r => r.Seat_Id == seat.Id)
+                }).OrderBy(seat => seat.Row).ThenBy(seat => seat.Number).ToList()
+            }
+        }).OrderBy(s => s.Date).ToList() ?? new List<MShowingDto>()
+    };
 
-            return Ok(movieDto);
-        }
+    return Ok(movieDto);
+}
 
         // 3. POST: api/movies
         [HttpPost]

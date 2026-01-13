@@ -26,7 +26,6 @@ namespace MovieReservationSystem.Data
         public DbSet<Seat> Seats { get; set; }
         public DbSet<Showing> Showings { get; set; }
         public DbSet<Reservation> Reservations { get; set; }
-        public DbSet<MovieReservationSystem.Models.File> Files { get; set; }
         public DbSet<Price> Prices { get; set; }
 
         protected override void OnModelCreating(ModelBuilder model)

@@ -54,7 +54,7 @@ namespace MovieReservationSystem.Controllers
                 Director = m.Director,
                 Production = m.Production,
                 Cast = m.Cast,
-                Poster = m.Poster?.File_Name,
+                Poster = m.PosterPath ?? "",
                 Genres = m.MovieGenres.Select(mg => mg.Genre.Name).ToList()
             }).ToList();
 

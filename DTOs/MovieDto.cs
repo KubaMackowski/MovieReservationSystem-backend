@@ -16,6 +16,7 @@ namespace MovieReservationSystem.DTOs
         public string Production { get; set; }
         public string Cast { get; set; }
         public string Poster { get; set; }
+        public string PosterPath { get; set; }
         
         // Zwracamy listę nazw gatunków, zamiast skomplikowanych obiektów
         public List<string> Genres { get; set; } = new List<string>();
@@ -72,6 +73,8 @@ namespace MovieReservationSystem.DTOs
         
         [Required]
         public string Cast { get; set; }
+        
+        public string PosterPath { get; set; }
 
         // Lista ID gatunków, które chcemy przypisać do filmu (np. [1, 2])
         public List<int> GenreIds { get; set; } = new List<int>();
@@ -88,6 +91,7 @@ namespace MovieReservationSystem.DTOs
         public string Director { get; set; }
         public string Production { get; set; }
         public string Cast { get; set; }
+        public string PosterPath { get; set; }
         
         // Opcjonalnie: Aktualizacja listy gatunków
         public List<int>? GenreIds { get; set; }

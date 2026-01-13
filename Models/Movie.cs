@@ -15,17 +15,10 @@ namespace MovieReservationSystem.Models
         public required string Cast { get; set; }
         public required string Director { get; set; }
         public required string Production { get; set; }
+        
+        public string ? PosterPath { get; set; }
 
         public required ICollection<MovieGenre> MovieGenres { get; set; }
         public ICollection<Showing>? Showings { get; set; }
-
-        // --- RELACJA DO PLIKU (POSTER) ---
-
-        // 1. Klucz obcy (nullable 'int?', jeśli plakat nie jest obowiązkowy przy tworzeniu filmu)
-        public int? PosterId { get; set; }
-
-        // 2. Właściwość nawigacyjna
-        [ForeignKey("PosterId")]
-        public File? Poster { get; set; } 
     }
 }

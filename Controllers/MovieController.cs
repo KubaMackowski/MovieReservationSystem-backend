@@ -41,6 +41,7 @@ namespace MovieReservationSystem.Controllers
                 Director = m.Director,
                 Production = m.Production,
                 Cast = m.Cast,
+                PosterPath =  m.PosterPath ?? "",
                 // Wyciągamy same nazwy gatunków
                 Genres = m.MovieGenres.Select(mg => mg.Genre.Name).ToList()
             }).ToList();
@@ -73,6 +74,7 @@ namespace MovieReservationSystem.Controllers
         Director = movie.Director,
         Production = movie.Production,
         Cast = movie.Cast,
+        PosterPath =  movie.PosterPath ?? "",
         Genres = movie.MovieGenres.Select(mg => mg.Genre.Name).ToList(),
         
         // --- MAPOWANIE RĘCZNE (PRZERYWA PĘTLĘ) ---
@@ -121,6 +123,7 @@ namespace MovieReservationSystem.Controllers
                 Director = model.Director,
                 Production = model.Production,
                 Cast = model.Cast,
+                PosterPath = model.PosterPath,
                 
                 // Inicjalizujemy puste kolekcje, bo są "required" w Twoim modelu
                 MovieGenres = new List<MovieGenre>(),
@@ -170,6 +173,7 @@ namespace MovieReservationSystem.Controllers
             movie.Director = model.Director;
             movie.Production = model.Production;
             movie.Cast = model.Cast;
+            movie.PosterPath = model.PosterPath;
 
             // Aktualizacja gatunków (jeśli podano nową listę)
             if (model.GenreIds != null)

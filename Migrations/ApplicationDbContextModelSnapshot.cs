@@ -218,35 +218,6 @@ namespace MovieReservationSystem.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("MovieReservationSystem.Models.File", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("File_Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Format")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Hash")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Files");
-                });
-
             modelBuilder.Entity("MovieReservationSystem.Models.Genre", b =>
                 {
                     b.Property<int>("Id")
@@ -290,8 +261,8 @@ namespace MovieReservationSystem.Migrations
                     b.Property<int>("Duration")
                         .HasColumnType("integer");
 
-                    b.Property<int?>("PosterId")
-                        .HasColumnType("integer");
+                    b.Property<string>("PosterPath")
+                        .HasColumnType("text");
 
                     b.Property<string>("Production")
                         .IsRequired()
@@ -309,8 +280,6 @@ namespace MovieReservationSystem.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("PosterId");
 
                     b.ToTable("Movies");
                 });
@@ -516,15 +485,6 @@ namespace MovieReservationSystem.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("MovieReservationSystem.Models.Movie", b =>
-                {
-                    b.HasOne("MovieReservationSystem.Models.File", "Poster")
-                        .WithMany()
-                        .HasForeignKey("PosterId");
-
-                    b.Navigation("Poster");
                 });
 
             modelBuilder.Entity("MovieReservationSystem.Models.MovieGenre", b =>

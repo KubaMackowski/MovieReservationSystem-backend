@@ -57,11 +57,13 @@ namespace MovieReservationSystem.Controllers
     var movie = await _context.Movies
         .Include(m => m.MovieGenres).ThenInclude(mg => mg.Genre)
         .Include(m => m.Showings).ThenInclude(s => s.Room).ThenInclude(r => r.SeatsList)
-        .Include(m => m.Showings).ThenInclude(s => s.Reservations) // Potrzebne do sprawdzenia zajętości
-        .Include(m => m.Showings).ThenInclude(s => s.Prices)
+        .Include(m => m.Showings).ThenInclude(s => s.Reservations)
         .FirstOrDefaultAsync(m => m.Id == id);
 
     if (movie == null) return NotFound("Film nie został znaleziony.");
+
+    // Ustal obecny czas (Użyj UtcNow jeśli w bazie masz UTC, lub Now jeśli czas lokalny)
+    var currentTime = DateTime.UtcNow; 
 
     var movieDto = new MovieDto
     {
@@ -74,32 +76,33 @@ namespace MovieReservationSystem.Controllers
         Director = movie.Director,
         Production = movie.Production,
         Cast = movie.Cast,
-        PosterPath =  movie.PosterPath ?? "",
+        PosterPath = movie.PosterPath ?? "",
         Genres = movie.MovieGenres.Select(mg => mg.Genre.Name).ToList(),
-        
-        // --- MAPOWANIE RĘCZNE (PRZERYWA PĘTLĘ) ---
-        Showings = movie.Showings?.Select(s => new MShowingDto
-        {
-            Id = s.Id,
-            Date = s.Date,
-            End_Date = s.End_Date,
-            Price = s.Prices?.FirstOrDefault()?.PriceValue ?? 0, // Pobieramy cenę
-            
-            Room = new MRoomDto
+
+        // --- ZMIANA TUTAJ ---
+        Showings = movie.Showings?
+            .Where(s => s.Date > currentTime) // <--- FILTROWANIE (tylko przyszłe seanse)
+            .Select(s => new MShowingDto
             {
-                Id = s.Room.Id,
-                Number = s.Room.Number,
-                // Mapujemy miejsca i sprawdzamy czy są zajęte w TYM seansie
-                Seats = s.Room.SeatsList.Select(seat => new MSeatDto
+                Id = s.Id,
+                Date = s.Date,
+                End_Date = s.End_Date,
+                Price = s.Price,
+                Room = new MRoomDto
                 {
-                    Id = seat.Id,
-                    Row = seat.Row,
-                    Number = seat.Number,
-                    // Sprawdzamy czy ID miejsca znajduje się na liście rezerwacji tego seansu
-                    IsOccupied = s.Reservations.Any(r => r.Seat_Id == seat.Id)
-                }).OrderBy(seat => seat.Row).ThenBy(seat => seat.Number).ToList()
-            }
-        }).OrderBy(s => s.Date).ToList() ?? new List<MShowingDto>()
+                    Id = s.Room.Id,
+                    Number = s.Room.Number,
+                    Seats = s.Room.SeatsList.Select(seat => new MSeatDto
+                    {
+                        Id = seat.Id,
+                        Row = seat.Row,
+                        Number = seat.Number,
+                        IsOccupied = s.Reservations.Any(r => r.Seat_Id == seat.Id)
+                    }).OrderBy(seat => seat.Row).ThenBy(seat => seat.Number).ToList()
+                }
+            })
+            .OrderBy(s => s.Date)
+            .ToList() ?? new List<MShowingDto>()
     };
 
     return Ok(movieDto);

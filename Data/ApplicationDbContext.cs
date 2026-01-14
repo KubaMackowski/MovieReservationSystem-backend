@@ -26,7 +26,6 @@ namespace MovieReservationSystem.Data
         public DbSet<Seat> Seats { get; set; }
         public DbSet<Showing> Showings { get; set; }
         public DbSet<Reservation> Reservations { get; set; }
-        public DbSet<Price> Prices { get; set; }
 
         protected override void OnModelCreating(ModelBuilder model)
         {
@@ -73,11 +72,6 @@ namespace MovieReservationSystem.Data
                 .HasOne(s => s.Movie)
                 .WithMany(m => m.Showings)
                 .HasForeignKey(s => s.Movie_Id);
-
-            model.Entity<Price>()
-                .HasOne(p => p.Showing)
-                .WithMany(s => s.Prices)
-                .HasForeignKey(p => p.Showing_Id);
         }
     }
 }

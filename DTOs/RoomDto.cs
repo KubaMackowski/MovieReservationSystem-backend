@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using MovieReservationSystem.Models;
 
 namespace MovieReservationSystem.DTOs
 {
@@ -11,6 +12,8 @@ namespace MovieReservationSystem.DTOs
         
         // Opcjonalnie: informacja ile fizycznie jest miejsc w liście
         public int GeneratedSeatsCount { get; set; } 
+        
+        public required MSeatDto[] SeatObjects { get; set; }
     }
 
     // 2. Tworzenie (CREATE)

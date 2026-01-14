@@ -34,7 +34,13 @@ namespace MovieReservationSystem.Controllers
                 Id = r.Id,
                 Number = r.Number,
                 Seats = r.Seats,
-                GeneratedSeatsCount = r.SeatsList.Count // Ile faktycznie jest obiektów Seat
+                GeneratedSeatsCount = r.SeatsList.Count, // Ile faktycznie jest obiektów Seat
+                SeatObjects = r.SeatsList.Select(s => new MSeatDto
+                {
+                    Id = s.Id,
+                    Row = s.Row,
+                    Number = s.Number
+                }).ToArray()
             });
 
             return Ok(dtos);
@@ -56,7 +62,13 @@ namespace MovieReservationSystem.Controllers
                 Id = room.Id,
                 Number = room.Number,
                 Seats = room.Seats,
-                GeneratedSeatsCount = room.SeatsList.Count
+                GeneratedSeatsCount = room.SeatsList.Count,
+                SeatObjects = room.SeatsList.Select(s => new MSeatDto
+                {
+                    Id = s.Id,
+                    Row = s.Row,
+                    Number = s.Number
+                }).ToArray()
             });
         }
 
@@ -106,7 +118,13 @@ namespace MovieReservationSystem.Controllers
                 Id = room.Id,
                 Number = room.Number,
                 Seats = room.Seats,
-                GeneratedSeatsCount = room.SeatsList.Count
+                GeneratedSeatsCount = room.SeatsList.Count,
+                SeatObjects = room.SeatsList.Select(s => new MSeatDto
+                {
+                    Id = s.Id,
+                    Row = s.Row,
+                    Number = s.Number
+                }).ToArray()
             };
 
             return CreatedAtAction(nameof(GetById), new { id = room.Id }, dto);

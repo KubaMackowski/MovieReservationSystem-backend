@@ -28,6 +28,9 @@ namespace MovieReservationSystem.DTOs
 
         [Required]
         public DateTime Date { get; set; }
+        
+        [Required]
+        public decimal Price { get; set; }
     }
 
     // 3. Aktualizacja (UPDATE)
@@ -36,5 +39,6 @@ namespace MovieReservationSystem.DTOs
         public int Movie_Id { get; set; }
         public int Room_Id { get; set; }
         public DateTime Date { get; set; }
+        public decimal Price { get; set; }
     }
 }

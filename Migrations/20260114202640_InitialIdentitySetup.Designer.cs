@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace MovieReservationSystem.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260113224835_InitialIdentitySetup")]
+    [Migration("20260114202640_InitialIdentitySetup")]
     partial class InitialIdentitySetup
     {
         /// <inheritdoc />
@@ -310,27 +310,6 @@ namespace MovieReservationSystem.Migrations
                     b.ToTable("MovieGenres");
                 });
 
-            modelBuilder.Entity("MovieReservationSystem.Models.Price", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<decimal>("PriceValue")
-                        .HasColumnType("numeric");
-
-                    b.Property<int>("Showing_Id")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Showing_Id");
-
-                    b.ToTable("Prices");
-                });
-
             modelBuilder.Entity("MovieReservationSystem.Models.Reservation", b =>
                 {
                     b.Property<int>("Id")
@@ -427,6 +406,9 @@ namespace MovieReservationSystem.Migrations
                     b.Property<int>("Movie_Id")
                         .HasColumnType("integer");
 
+                    b.Property<decimal>("Price")
+                        .HasColumnType("numeric");
+
                     b.Property<int>("Room_Id")
                         .HasColumnType("integer");
 
@@ -507,17 +489,6 @@ namespace MovieReservationSystem.Migrations
                     b.Navigation("Genre");
 
                     b.Navigation("Movie");
-                });
-
-            modelBuilder.Entity("MovieReservationSystem.Models.Price", b =>
-                {
-                    b.HasOne("MovieReservationSystem.Models.Showing", "Showing")
-                        .WithMany("Prices")
-                        .HasForeignKey("Showing_Id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Showing");
                 });
 
             modelBuilder.Entity("MovieReservationSystem.Models.Reservation", b =>
@@ -608,8 +579,6 @@ namespace MovieReservationSystem.Migrations
 
             modelBuilder.Entity("MovieReservationSystem.Models.Showing", b =>
                 {
-                    b.Navigation("Prices");
-
                     b.Navigation("Reservations");
                 });
 #pragma warning restore 612, 618

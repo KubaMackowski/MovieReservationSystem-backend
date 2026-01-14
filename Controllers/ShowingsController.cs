@@ -94,7 +94,8 @@ namespace MovieReservationSystem.Controllers
                 Movie_Id = model.Movie_Id,
                 Room_Id = model.Room_Id,
                 Movie = movie, // <--- Spełniamy wymóg 'required'
-                Room = room    // <--- Spełniamy wymóg 'required'
+                Room = room,    // <--- Spełniamy wymóg 'required'
+                Price = model.Price,
             };
 
             _context.Showings.Add(showing);
@@ -148,6 +149,7 @@ namespace MovieReservationSystem.Controllers
 
             // Aktualizujemy datę
             showing.Date = model.Date;
+            showing.Price = model.Price;
             
             // Zawsze przeliczamy End_Date (bo mogła zmienić się data startu LUB film)
             // showing.Movie jest dostępny dzięki .Include lub powyższemu pobraniu

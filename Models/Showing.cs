@@ -11,10 +11,9 @@ public class Showing
     public DateTime Date { get; set; }
     public DateTime End_Date { get; set; }
     public int Room_Id { get; set; }
-
     public required Movie Movie { get; set; }
     public required Room Room { get; set; }
+    public required decimal Price { get; set; }
     public ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();
-    public ICollection<Price>? Prices { get; set; }
 }
 }

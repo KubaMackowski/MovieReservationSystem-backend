@@ -262,7 +262,8 @@ namespace MovieReservationSystem.Migrations
                     Movie_Id = table.Column<int>(type: "integer", nullable: false),
                     Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     End_Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    Room_Id = table.Column<int>(type: "integer", nullable: false)
+                    Room_Id = table.Column<int>(type: "integer", nullable: false),
+                    Price = table.Column<decimal>(type: "numeric", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -277,26 +278,6 @@ namespace MovieReservationSystem.Migrations
                         name: "FK_Showings_Rooms_Room_Id",
                         column: x => x.Room_Id,
                         principalTable: "Rooms",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Prices",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Showing_Id = table.Column<int>(type: "integer", nullable: false),
-                    PriceValue = table.Column<decimal>(type: "numeric", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Prices", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Prices_Showings_Showing_Id",
-                        column: x => x.Showing_Id,
-                        principalTable: "Showings",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -384,11 +365,6 @@ namespace MovieReservationSystem.Migrations
                 column: "MovieId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Prices_Showing_Id",
-                table: "Prices",
-                column: "Showing_Id");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Reservations_Seat_Id",
                 table: "Reservations",
                 column: "Seat_Id");
@@ -440,9 +416,6 @@ namespace MovieReservationSystem.Migrations
 
             migrationBuilder.DropTable(
                 name: "MovieGenres");
-
-            migrationBuilder.DropTable(
-                name: "Prices");
 
             migrationBuilder.DropTable(
                 name: "Reservations");

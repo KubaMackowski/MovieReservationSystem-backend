@@ -135,6 +135,26 @@ namespace MovieReservationSystem.Controllers
 
             return CreatedAtAction(nameof(GetById), new { id = reservation.Id }, dto);
         }
+        
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateReservationDto model)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            var reservation = await _context.Reservations.FindAsync(id);
+            if (reservation == null) return NotFound("Rezerwacja nie istnieje.");
+
+            // Aktualizacja pól rezerwacji
+            reservation.Showing_Id = model.ShowingId;
+            reservation.Seat_Id = model.SeatId;
+
+            // Możesz dodać dodatkową logikę walidacji tutaj, jeśli to konieczne
+
+            _context.Reservations.Update(reservation);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
 
         // 4. DELETE: api/reservations/5
         [HttpDelete("{id}")]

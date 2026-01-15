@@ -1,4 +1,4 @@
-namespace MovieReservationSystem.Models // <--- DODAJ
+namespace MovieReservationSystem.Models 
 {
     public class MovieGenre
     {

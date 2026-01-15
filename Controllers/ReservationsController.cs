@@ -4,12 +4,13 @@ using Microsoft.EntityFrameworkCore;
 using MovieReservationSystem.Data;
 using MovieReservationSystem.DTOs;
 using MovieReservationSystem.Models;
+using System.Security.Claims; 
 
 namespace MovieReservationSystem.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Roles = "ADMIN")] // Tylko admin zarządza rezerwacjami w tym kontrolerze
+    
     public class ReservationsController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -19,15 +20,16 @@ namespace MovieReservationSystem.Controllers
             _context = context;
         }
 
-        // 1. GET: api/reservations
+        
         [HttpGet]
+        [Authorize(Roles = "ADMIN")] 
         public async Task<ActionResult<IEnumerable<ReservationDto>>> GetAll()
         {
             var reservations = await _context.Reservations
-                .Include(r => r.User)           // Dołącz Usera
-                .Include(r => r.Showing)        // Dołącz Seans
-                    .ThenInclude(s => s.Movie)  // ... i Film w seansie
-                .Include(r => r.Seat)           // Dołącz Miejsce
+                .Include(r => r.User)
+                .Include(r => r.Showing)
+                    .ThenInclude(s => s.Movie)
+                .Include(r => r.Seat)
                 .OrderByDescending(r => r.Created_At)
                 .ToListAsync();
 
@@ -41,15 +43,50 @@ namespace MovieReservationSystem.Controllers
                 MovieTitle = r.Showing.Movie.Title,
                 ShowingDate = r.Showing.Date,
                 SeatId = r.Seat_Id,
-                SeatRow = r.Seat.Row,       // Upewnij się, że masz takie pole w Seat
-                SeatNumber = r.Seat.Number  // Upewnij się, że masz takie pole w Seat
+                SeatRow = r.Seat.Row,
+                SeatNumber = r.Seat.Number
             });
 
             return Ok(dtos);
         }
 
-        // 2. GET: api/reservations/5
+        
+        [HttpGet("my")]
+        [Authorize] 
+        public async Task<ActionResult<IEnumerable<ReservationDto>>> GetMyReservations()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            var reservations = await _context.Reservations
+                .Include(r => r.User)
+                .Include(r => r.Showing)
+                    .ThenInclude(s => s.Movie)
+                .Include(r => r.Seat)
+                .Where(r => r.UserId == userId) 
+                .OrderByDescending(r => r.Created_At)
+                .ToListAsync();
+
+            var dtos = reservations.Select(r => new ReservationDto
+            {
+                Id = r.Id,
+                Created_At = r.Created_At,
+                UserId = r.UserId,
+                UserEmail = r.User?.Email,
+                ShowingId = r.Showing_Id,
+                MovieTitle = r.Showing?.Movie?.Title,
+                ShowingDate = r.Showing?.Date ?? DateTime.MinValue,
+                SeatId = r.Seat_Id,
+                SeatRow = r.Seat?.Row ?? 0,
+                SeatNumber = r.Seat?.Number ?? 0
+            });
+
+            return Ok(dtos);
+        }
+
         [HttpGet("{id}")]
+        [Authorize] 
         public async Task<ActionResult<ReservationDto>> GetById(int id)
         {
             var r = await _context.Reservations
@@ -60,6 +97,8 @@ namespace MovieReservationSystem.Controllers
                 .FirstOrDefaultAsync(x => x.Id == id);
 
             if (r == null) return NotFound("Rezerwacja nie istnieje.");
+
+            
 
             return Ok(new ReservationDto
             {
@@ -76,14 +115,14 @@ namespace MovieReservationSystem.Controllers
             });
         }
 
-        // 3. POST: api/reservations
         [HttpPost]
-        [AllowAnonymous]
+        [Authorize] 
         public async Task<ActionResult<ReservationDto>> Create([FromBody] CreateReservationDto model)
         {
+            
+            
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            // A. Walidacja czy miejsce jest już zajęte na ten seans
             bool isSeatTaken = await _context.Reservations.AnyAsync(r => 
                 r.Showing_Id == model.ShowingId && r.Seat_Id == model.SeatId);
 
@@ -92,7 +131,6 @@ namespace MovieReservationSystem.Controllers
                 return Conflict("To miejsce jest już zarezerwowane na ten seans.");
             }
 
-            // B. Pobieranie obiektów (wymagane przez 'required' w modelu)
             var user = await _context.Users.FindAsync(model.UserId);
             if (user == null) return BadRequest("Użytkownik nie istnieje.");
 
@@ -102,23 +140,20 @@ namespace MovieReservationSystem.Controllers
             var seat = await _context.Seats.FindAsync(model.SeatId);
             if (seat == null) return BadRequest("Miejsce nie istnieje.");
 
-            // C. Tworzenie rezerwacji
             var reservation = new Reservation
             {
                 Created_At = DateTime.UtcNow,
                 UserId = model.UserId,
-                User = user,       // <--- Spełniamy wymóg 'required'
+                User = user,       
                 Showing_Id = model.ShowingId,
-                Showing = showing, // <--- Spełniamy wymóg 'required'
+                Showing = showing, 
                 Seat_Id = model.SeatId,
-                Seat = seat        // <--- Spełniamy wymóg 'required'
-                // Ignoruję User_Id (int), bo używamy string UserId dla Identity
+                Seat = seat        
             };
 
             _context.Reservations.Add(reservation);
             await _context.SaveChangesAsync();
 
-            // Zwracamy DTO
             var dto = new ReservationDto
             {
                 Id = reservation.Id,
@@ -137,6 +172,7 @@ namespace MovieReservationSystem.Controllers
         }
         
         [HttpPut("{id}")]
+        [Authorize(Roles = "ADMIN")] 
         public async Task<IActionResult> Update(int id, [FromBody] UpdateReservationDto model)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -144,11 +180,8 @@ namespace MovieReservationSystem.Controllers
             var reservation = await _context.Reservations.FindAsync(id);
             if (reservation == null) return NotFound("Rezerwacja nie istnieje.");
 
-            // Aktualizacja pól rezerwacji
             reservation.Showing_Id = model.ShowingId;
             reservation.Seat_Id = model.SeatId;
-
-            // Możesz dodać dodatkową logikę walidacji tutaj, jeśli to konieczne
 
             _context.Reservations.Update(reservation);
             await _context.SaveChangesAsync();
@@ -156,8 +189,8 @@ namespace MovieReservationSystem.Controllers
             return NoContent();
         }
 
-        // 4. DELETE: api/reservations/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "ADMIN")] 
         public async Task<IActionResult> Delete(int id)
         {
             var reservation = await _context.Reservations.FindAsync(id);

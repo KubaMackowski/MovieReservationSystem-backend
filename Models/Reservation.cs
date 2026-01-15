@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Identity; 
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace MovieReservationSystem.Models // <--- DODAJ TO (Początek)
+namespace MovieReservationSystem.Models 
 {
     public class Reservation
     {
@@ -13,7 +13,7 @@ namespace MovieReservationSystem.Models // <--- DODAJ TO (Początek)
 
     public string UserId { get; set; } 
 
-    // 2. Relacja wskazuje na IdentityUser (lub ApplicationUser, jeśli go stworzyłeś)
+    
     [ForeignKey("UserId")]
     public ApplicationUser User { get; set; }    
     public required Showing Showing { get; set; }

@@ -6,10 +6,10 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace MovieReservationSystem.Migrations
 {
-    /// <inheritdoc />
+    
     public partial class InitialIdentitySetup : Migration
     {
-        /// <inheritdoc />
+        
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
@@ -396,7 +396,7 @@ namespace MovieReservationSystem.Migrations
                 column: "Room_Id");
         }
 
-        /// <inheritdoc />
+        
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(

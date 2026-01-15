@@ -6,7 +6,7 @@ using MovieReservationSystem.DTOs;
 namespace MovieReservationSystem.Controllers
 {
     [ApiController]
-    [Route("api/public/movies")] // Inna ścieżka niż dla admina
+    [Route("api/public/movies")] 
     public class PublicMoviesController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -16,10 +16,7 @@ namespace MovieReservationSystem.Controllers
             _context = context;
         }
 
-        // GET: api/public/movies
-        // Obsługuje dwa scenariusze:
-        // 1. ?genreId=5 -> Zwraca filmy z kategorii ID 5
-        // 2. (brak parametru) -> Zwraca 20 najnowszych filmów
+        
         [HttpGet]
         public async Task<ActionResult<IEnumerable<MovieDto>>> GetMovies([FromQuery] int? genreId)
         {
@@ -30,17 +27,17 @@ namespace MovieReservationSystem.Controllers
 
             if (genreId.HasValue)
             {
-                // Scenariusz A: Użytkownik kliknął w kategorię
+               
                 query = query.Where(m => m.MovieGenres.Any(mg => mg.Genre_Id == genreId.Value));
             }
             else
             {
-                // Scenariusz B: Strona główna (Nowości)
+                
                 query = query.OrderByDescending(m => m.Relase_Date);
             }
 
             var movies = await query
-                .Take(20) // Limit do 20 wyników
+                .Take(20) 
                 .ToListAsync();
 
             var movieDtos = movies.Select(m => new MovieDto
@@ -61,8 +58,7 @@ namespace MovieReservationSystem.Controllers
             return Ok(movieDtos);
         }
 
-        // GET: api/public/movies/5
-        // Szczegóły filmu (dla zwykłego użytkownika)
+        
         [HttpGet("{id}")]
         public async Task<ActionResult<MovieDto>> GetMovieDetails(int id)
         {

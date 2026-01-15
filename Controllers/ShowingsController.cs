@@ -9,7 +9,7 @@ namespace MovieReservationSystem.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    //[Authorize(Roles = "ADMIN")]
+    
     public class ShowingsController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -19,15 +19,15 @@ namespace MovieReservationSystem.Controllers
             _context = context;
         }
 
-        // 1. GET: api/showings
+        
         [HttpGet]
         [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<ShowingDto>>> GetAll()
         {
             var showings = await _context.Showings
-                .Include(s => s.Movie) // Pobierz dane filmu (tytuł)
-                .Include(s => s.Room)  // Pobierz dane sali (nazwa)
-                .OrderBy(s => s.Date)  // Sortuj od najwcześniejszych
+                .Include(s => s.Movie) 
+                .Include(s => s.Room)  
+                .OrderBy(s => s.Date)  
                 .ToListAsync();
 
            var showingDtos = showings.Select(s => new ShowingDto
@@ -38,13 +38,13 @@ namespace MovieReservationSystem.Controllers
                     Movie_Id = s.Movie_Id,
                     MovieTitle = s.Movie.Title,
                     Room_Id = s.Room_Id,
-                    RoomNumber = s.Room.Number // <--- POPRAWKA TUTAJ
+                    RoomNumber = s.Room.Number 
                 });
 
             return Ok(showingDtos);
         }
 
-        // 2. GET: api/showings/5
+        
         [HttpGet("{id}")]
         [AllowAnonymous]
         public async Task<ActionResult<ShowingDto>> GetById(int id)
@@ -64,44 +64,44 @@ namespace MovieReservationSystem.Controllers
                 Movie_Id = showing.Movie_Id,
                 MovieTitle = showing.Movie.Title,
                 Room_Id = showing.Room_Id,
-                RoomNumber = showing.Room.Number // <--- POPRAWKA TUTAJ
+                RoomNumber = showing.Room.Number 
             });
         }
-        // 3. POST: api/showings
+        
         [HttpPost]
         public async Task<ActionResult<ShowingDto>> Create([FromBody] CreateShowingDto model)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            // 1. Pobierz Film (potrzebny do czasu trwania i required)
+            
             var movie = await _context.Movies.FindAsync(model.Movie_Id);
             if (movie == null) return BadRequest("Podany film nie istnieje.");
 
-            // 2. Pobierz Salę (potrzebna do required)
+            
             var room = await _context.Rooms.FindAsync(model.Room_Id);
             if (room == null) return BadRequest("Podana sala nie istnieje.");
 
-            // 3. Oblicz datę zakończenia (Start + Czas trwania filmu)
+            
             var endDate = model.Date.AddMinutes(movie.Duration);
 
-            // (Opcjonalnie: Tutaj można dodać walidację, czy sala jest wolna w tym czasie)
+            
 
-            // 4. Utwórz obiekt (z przypisaniem całych obiektów Movie i Room)
+            
             var showing = new Showing
             {
                 Date = model.Date,
                 End_Date = endDate,
                 Movie_Id = model.Movie_Id,
                 Room_Id = model.Room_Id,
-                Movie = movie, // <--- Spełniamy wymóg 'required'
-                Room = room,    // <--- Spełniamy wymóg 'required'
+                Movie = movie, 
+                Room = room,    
                 Price = model.Price,
             };
 
             _context.Showings.Add(showing);
             await _context.SaveChangesAsync();
 
-            // Zwracamy DTO
+            
             var resultDto = new ShowingDto
             {
                 Id = showing.Id,
@@ -116,18 +116,18 @@ namespace MovieReservationSystem.Controllers
             return CreatedAtAction(nameof(GetById), new { id = showing.Id }, resultDto);
         }
 
-        // 4. PUT: api/showings/5
+        
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateShowingDto model)
         {
             var showing = await _context.Showings
-                .Include(s => s.Movie) // Ważne, żeby mieć dostęp do czasu trwania filmu
+                .Include(s => s.Movie) 
                 .Include(s => s.Room)
                 .FirstOrDefaultAsync(s => s.Id == id);
 
             if (showing == null) return NotFound("Seans nie istnieje.");
 
-            // Sprawdzamy czy zmieniono film (jeśli tak, musimy pobrać nowy, by przeliczyć czas)
+            
             if (showing.Movie_Id != model.Movie_Id)
             {
                 var movie = await _context.Movies.FindAsync(model.Movie_Id);
@@ -137,7 +137,7 @@ namespace MovieReservationSystem.Controllers
                 showing.Movie_Id = model.Movie_Id;
             }
 
-            // Sprawdzamy czy zmieniono salę
+            
             if (showing.Room_Id != model.Room_Id)
             {
                 var room = await _context.Rooms.FindAsync(model.Room_Id);
@@ -147,19 +147,18 @@ namespace MovieReservationSystem.Controllers
                 showing.Room_Id = model.Room_Id;
             }
 
-            // Aktualizujemy datę
+            
             showing.Date = model.Date;
             showing.Price = model.Price;
             
-            // Zawsze przeliczamy End_Date (bo mogła zmienić się data startu LUB film)
-            // showing.Movie jest dostępny dzięki .Include lub powyższemu pobraniu
+            
             showing.End_Date = showing.Date.AddMinutes(showing.Movie.Duration);
 
             await _context.SaveChangesAsync();
             return NoContent();
         }
 
-        // 5. DELETE: api/showings/5
+       
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {

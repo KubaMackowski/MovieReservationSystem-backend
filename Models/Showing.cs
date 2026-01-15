@@ -1,4 +1,4 @@
-using System.Collections.Generic; // To może być potrzebne do List<>
+using System.Collections.Generic; 
 
 namespace MovieReservationSystem.Models
 {

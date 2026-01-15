@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema; // Potrzebne do atrybutu [ForeignKey]
+using System.ComponentModel.DataAnnotations.Schema; 
 
 namespace MovieReservationSystem.Models
 {

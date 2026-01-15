@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace MovieReservationSystem.Models // <--- DODAJ LINIĘ 1
+namespace MovieReservationSystem.Models 
 {
     public class Room
     {

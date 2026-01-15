@@ -15,7 +15,7 @@ namespace MovieReservationSystem.Controllers
     public class AuthController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly IConfiguration _configuration; // Potrzebne do pobrania klucza z appsettings
+        private readonly IConfiguration _configuration;
 
         public AuthController(
             UserManager<ApplicationUser> userManager,
@@ -57,21 +57,20 @@ namespace MovieReservationSystem.Controllers
         {
             var user = await _userManager.FindByEmailAsync(model.Email);
             
-            // 1. Sprawdzamy czy user istnieje i czy hasło jest poprawne
-            // Używamy CheckPasswordAsync zamiast SignInManager
+            
             if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
             {
-                // 2. Jeśli dane są OK, generujemy token
+                
                 var userRoles = await _userManager.GetRolesAsync(user);
 
                 var authClaims = new List<Claim>
                 {
                     new Claim(ClaimTypes.Name, user.UserName),
                     new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                    new Claim(ClaimTypes.NameIdentifier, user.Id) // ID usera w tokenie często się przydaje
+                    new Claim(ClaimTypes.NameIdentifier, user.Id) 
                 };
 
-                // Dodajemy role do tokenu (jeśli używasz ról)
+                
                 foreach (var userRole in userRoles)
                 {
                     authClaims.Add(new Claim(ClaimTypes.Role, userRole));
@@ -82,7 +81,7 @@ namespace MovieReservationSystem.Controllers
                 var token = new JwtSecurityToken(
                     issuer: _configuration["Jwt:Issuer"],
                     audience: _configuration["Jwt:Audience"],
-                    expires: DateTime.Now.AddHours(3), // Token ważny przez 3 godziny
+                    expires: DateTime.Now.AddHours(3), 
                     claims: authClaims,
                     signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
                 );

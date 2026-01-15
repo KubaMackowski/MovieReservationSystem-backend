@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using MovieReservationSystem.Data; // <--- Twój namespace DbContext
+using MovieReservationSystem.Data; 
 using MovieReservationSystem.DTOs;
 using MovieReservationSystem.Models;
 
@@ -9,7 +9,7 @@ namespace MovieReservationSystem.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Roles = "ADMIN")] // Tylko Admin zarządza filmami
+    [Authorize(Roles = "ADMIN")] 
     public class MoviesController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -19,17 +19,17 @@ namespace MovieReservationSystem.Controllers
             _context = context;
         }
 
-        // 1. GET: api/movies
+        
         [HttpGet]
-        [AllowAnonymous] // Każdy może zobaczyć listę filmów
+        [AllowAnonymous] 
         public async Task<ActionResult<IEnumerable<MovieDto>>> GetAll()
         {
             var movies = await _context.Movies
-                .Include(m => m.MovieGenres) // Dołącz tabelę łączącą
-                    .ThenInclude(mg => mg.Genre) // Dołącz tabelę gatunków
+                .Include(m => m.MovieGenres) 
+                    .ThenInclude(mg => mg.Genre) 
                 .ToListAsync();
 
-            // Mapowanie na DTO
+            
             var movieDtos = movies.Select(m => new MovieDto
             {
                 Id = m.Id,
@@ -42,14 +42,13 @@ namespace MovieReservationSystem.Controllers
                 Production = m.Production,
                 Cast = m.Cast,
                 PosterPath =  m.PosterPath ?? "",
-                // Wyciągamy same nazwy gatunków
+                
                 Genres = m.MovieGenres.Select(mg => mg.Genre.Name).ToList()
             }).ToList();
 
             return Ok(movieDtos);
         }
-
-        // 2. GET: api/movies/5
+      
         [HttpGet("{id}")]
         [AllowAnonymous]
         public async Task<ActionResult<MovieDto>> GetById(int id)
@@ -62,7 +61,7 @@ namespace MovieReservationSystem.Controllers
 
     if (movie == null) return NotFound("Film nie został znaleziony.");
 
-    // Ustal obecny czas (Użyj UtcNow jeśli w bazie masz UTC, lub Now jeśli czas lokalny)
+    
     var currentTime = DateTime.UtcNow; 
 
     var movieDto = new MovieDto
@@ -79,9 +78,9 @@ namespace MovieReservationSystem.Controllers
         PosterPath = movie.PosterPath ?? "",
         Genres = movie.MovieGenres.Select(mg => mg.Genre.Name).ToList(),
 
-        // --- ZMIANA TUTAJ ---
+       
         Showings = movie.Showings?
-            .Where(s => s.Date > currentTime) // <--- FILTROWANIE (tylko przyszłe seanse)
+            .Where(s => s.Date > currentTime) 
             .Select(s => new MShowingDto
             {
                 Id = s.Id,
@@ -108,19 +107,19 @@ namespace MovieReservationSystem.Controllers
     return Ok(movieDto);
 }
 
-        // 3. POST: api/movies
+        
         [HttpPost]
         public async Task<ActionResult<MovieDto>> Create([FromBody] CreateMovieDto model)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            // Tworzymy nowy obiekt filmu
+            
             var movie = new Movie
             {
                 Title = model.Title,
                 Description = model.Description,
                 Status = model.Status,
-                Created_At = DateTime.UtcNow, // Ustawiamy datę utworzenia automatycznie
+                Created_At = DateTime.UtcNow, 
                 Relase_Date = model.Relase_Date,
                 Duration = model.Duration,
                 Director = model.Director,
@@ -128,15 +127,15 @@ namespace MovieReservationSystem.Controllers
                 Cast = model.Cast,
                 PosterPath = model.PosterPath,
                 
-                // Inicjalizujemy puste kolekcje, bo są "required" w Twoim modelu
+                
                 MovieGenres = new List<MovieGenre>(),
                 Showings = new List<Showing>()
             };
 
-            // Obsługa przypisywania gatunków (relacja wiele-do-wielu)
+            
             if (model.GenreIds != null && model.GenreIds.Any())
             {
-                // Pobieramy gatunki z bazy, żeby upewnić się, że istnieją
+                
                 var genres = await _context.Genres
                     .Where(g => model.GenreIds.Contains(g.Id))
                     .ToListAsync();
@@ -157,17 +156,17 @@ namespace MovieReservationSystem.Controllers
             return CreatedAtAction(nameof(GetById), new { id = movie.Id }, model);
         }
 
-        // 4. PUT: api/movies/5
+        
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateMovieDto model)
         {
             var movie = await _context.Movies
-                .Include(m => m.MovieGenres) // Ważne przy edycji relacji
+                .Include(m => m.MovieGenres) 
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (movie == null) return NotFound("Film nie istnieje.");
 
-            // Aktualizacja pól prostych
+            
             movie.Title = model.Title;
             movie.Description = model.Description;
             movie.Status = model.Status;
@@ -178,13 +177,13 @@ namespace MovieReservationSystem.Controllers
             movie.Cast = model.Cast;
             movie.PosterPath = model.PosterPath;
 
-            // Aktualizacja gatunków (jeśli podano nową listę)
+           
             if (model.GenreIds != null)
             {
-                // 1. Usuń stare powiązania
+                
                 movie.MovieGenres.Clear();
 
-                // 2. Dodaj nowe powiązania
+                
                 var genres = await _context.Genres
                     .Where(g => model.GenreIds.Contains(g.Id))
                     .ToListAsync();
@@ -194,9 +193,9 @@ namespace MovieReservationSystem.Controllers
                     movie.MovieGenres.Add(new MovieGenre 
                     { 
                         Genre_Id = genre.Id,
-                        Movie_Id = movie.Id, // Warto też przypisać ID filmu
-                        Movie = movie,       // <--- Tego brakowało (wymagane przez 'required')
-                        Genre = genre        // <--- Tego brakowało (wymagane przez 'required')
+                        Movie_Id = movie.Id, 
+                        Movie = movie,       
+                        Genre = genre       
                     });
                 }
             }
@@ -205,7 +204,7 @@ namespace MovieReservationSystem.Controllers
             return NoContent();
         }
 
-        // 5. DELETE: api/movies/5
+        
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {

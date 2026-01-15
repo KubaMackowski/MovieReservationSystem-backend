@@ -7,10 +7,11 @@ using MovieReservationSystem.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using MovieReservationSystem.Models;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+
 
 builder.Services.AddControllers();
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -19,14 +20,14 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(connectionString)
 );
 
-// Jeśli nie masz jeszcze klasy JwtService, usuń poniższą linię, żeby nie było błędu
+
 builder.Services.AddScoped<JwtService>();
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddDefaultTokenProviders(); // <--- TU MA BYĆ ŚREDNIK! Koniec konfiguracji Identity.
+    .AddDefaultTokenProviders(); 
 
-// BLOK 2: Konfiguracja JWT (zaczynamy od nowa na builder.Services)
+
 builder.Services.AddAuthentication(options => 
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -41,11 +42,11 @@ builder.Services
 
         options.TokenValidationParameters = new TokenValidationParameters()
         {
-            ValidateIssuer = false,   // Dla uproszczenia na start false
-            ValidateAudience = false, // Dla uproszczenia na start false
+            ValidateIssuer = false,   
+            ValidateAudience = false, 
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            // Upewnij się, że masz te wpisy w appsettings.json!
+            
             ValidAudience = builder.Configuration["Jwt:Audience"],
             ValidIssuer = builder.Configuration["Jwt:Issuer"],
             IssuerSigningKey = new SymmetricSecurityKey(
@@ -55,14 +56,47 @@ builder.Services
     });
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "MovieReservationSystem", Version = "v1" });
+
+    // 1. Definicja zabezpieczeń (tworzy przycisk Authorize)
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = @"Wpisz słowo 'Bearer', spację, a potem swój token. \r\n\r\n
+                      Przykład: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+
+    // 2. Wymaganie zabezpieczeń (dodaje kłódki przy endpointach)
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement()
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                },
+                Scheme = "oauth2",
+                Name = "Bearer",
+                In = ParameterLocation.Header,
+            },
+            new List<string>()
+        }
+    });
+});
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowNextJs",
         policy =>
         {
-            policy.WithOrigins("http://localhost:3000") // Adres frontendu
+            policy.WithOrigins("http://localhost:3000") 
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials(); 

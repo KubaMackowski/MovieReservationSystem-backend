@@ -105,19 +105,6 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    try 
-    {
-        await DataSeeder.SeedRolesAndAdminAsync(services);
-    }
-    catch (Exception ex)
-    {
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "Błąd podczas tworzenia ról.");
-    }
-}
 
 
 if (app.Environment.IsDevelopment())

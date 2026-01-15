@@ -32,13 +32,21 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgrespass
       - POSTGRES_DB=postgresdb
+      # Opcjonalnie: Jeśli Postgres 18 dalej będzie narzekał, można wymusić starą ścieżkę,
+      # ale lepiej dostosować się do nowej struktury montowania (poniżej).
     volumes:
+      # --- ZMIANA TUTAJ ---
+      # Zgodnie z błędem w Postgres 18+, montujemy do katalogu głównego, a nie do /data
       - postgres-data:/var/lib/postgresql
+      
+      # Import pliku SQL przy starcie (tylko na czystej bazie)
+      # Upewnij się, że plik nazywa się dokładnie tak jak na dysku (bazadomodyfikacji.sql)
+      - ./baza_filmy.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - "5438:5432"
     networks:
-      - app-network 
-
+      - app-network
+  
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: pgadmin-web
@@ -54,7 +62,7 @@ services:
     depends_on:
       - db
     networks:
-      - app-network 
+      - app-network
 
 volumes:
   postgres-data:

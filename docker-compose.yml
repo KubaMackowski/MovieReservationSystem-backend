@@ -31,6 +31,7 @@ services:
       - "traefik.http.routers.backend.tls.certresolver=myresolver"
       # Wskazujemy port, na którym aplikacja .NET nasłuchuje wewnątrz kontenera
       - "traefik.http.services.backend.loadbalancer.server.port=8080"
+      - "traefik.docker.network=traefik-public"
     networks:
       # 3. SIECI: Podpinamy do globalnej sieci Traefika, aby odbierać ruch,
       # oraz do Twojej lokalnej sieci, by .NET widział bazę PostgreSQL (db).

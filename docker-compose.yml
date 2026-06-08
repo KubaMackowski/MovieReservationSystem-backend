@@ -6,8 +6,9 @@ services:
       context: .
       target: build
     container_name: backend-api
-    ports:
-      - "8080:8080"
+    # 1. USUNIĘTE PORTY: Ruch z zewnątrz dla api.cinesoft.pl będzie szedł przez Traefika.
+    # ports:
+    #   - "8080:8080"
     environment:
       - DOTNET_USE_POLLING_FILE_WATCHER=true
       - ConnectionStrings__DefaultConnection=Server=db;Database=postgresdb;User Id=postgres;Password=postgrespass
@@ -22,7 +23,18 @@ services:
     command: >
       bash -c "dotnet dev-certs https --trust;
                dotnet watch run --project /src/MovieReservationSystem.csproj --urls http://*:8080"
+    labels:
+      # 2. ETYKIETY TRAEFIKA: Automatyczny routing i darmowy certyfikat SSL dla subdomeny API
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=Host(`api.cinesoft.pl`)"
+      - "traefik.http.routers.backend.entrypoints=websecure"
+      - "traefik.http.routers.backend.tls.certresolver=myresolver"
+      # Wskazujemy port, na którym aplikacja .NET nasłuchuje wewnątrz kontenera
+      - "traefik.http.services.backend.loadbalancer.server.port=8080"
     networks:
+      # 3. SIECI: Podpinamy do globalnej sieci Traefika, aby odbierać ruch,
+      # oraz do Twojej lokalnej sieci, by .NET widział bazę PostgreSQL (db).
+      - traefik-public
       - app-network
 
   db:
@@ -32,18 +44,11 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgrespass
       - POSTGRES_DB=postgresdb
-      # Opcjonalnie: Jeśli Postgres 18 dalej będzie narzekał, można wymusić starą ścieżkę,
-      # ale lepiej dostosować się do nowej struktury montowania (poniżej).
     volumes:
-      # --- ZMIANA TUTAJ ---
-      # Zgodnie z błędem w Postgres 18+, montujemy do katalogu głównego, a nie do /data
       - postgres-data:/var/lib/postgresql
-      
-      # Import pliku SQL przy starcie (tylko na czystej bazie)
-      # Upewnij się, że plik nazywa się dokładnie tak jak na dysku (bazadomodyfikacji.sql)
       - ./baza_filmy.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
-      - "5438:5432"
+      - "5438:5432" # Zostawiam, abyś mógł łączyć się z bazą bezpośrednio z komputera
     networks:
       - app-network
   
@@ -55,7 +60,7 @@ services:
       - PGADMIN_DEFAULT_PASSWORD=supersecretpass
       - PGADMIN_SERVER_JSON_FILE=/pgadmin4/servers.json
     ports:
-      - "5050:80"
+      - "5050:80" # Zostawiam dostęp do panelu pgAdmin po IP:5050
     volumes:
       - ./servers.json:/pgadmin4/servers.json:ro
       - pgadmin-data:/var/lib/pgadmin
@@ -69,6 +74,11 @@ volumes:
   pgadmin-data:
 
 networks:
+  # Definiujemy sieć zewnętrzną Traefika
+  traefik-public:
+    external: true
+  # Twoja dotychczasowa sieć (movie-system-network) zostaje bez zmian,
+  # dzięki czemu api, db i pgadmin idealnie się ze sobą widzą.
   app-network:
     name: movie-system-network
     driver: bridge
